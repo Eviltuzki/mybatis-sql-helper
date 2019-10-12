@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MyBatis SQL Generate Tools</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        @media (min-width: 768px) {
+            .bd-placeholder-img-lg {
+                font-size: 3.5rem;
+            }
+        }
+
+        body {
+            padding-top: 5rem;
+        }
+
+        .starter-template {
+            padding: 3rem 1.5rem;
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+    <a class="navbar-brand" href="#">功能</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
+            aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+                <a class="nav-link" href="#"> 实体映射 <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#"> XML SQL </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link " href="#">Annotation SQL</a>
+            </li>
+            <!--            <li class="nav-item dropdown">-->
+            <!--                <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true"-->
+            <!--                   aria-expanded="false">Dropdown</a>-->
+            <!--                <div class="dropdown-menu" aria-labelledby="dropdown01">-->
+            <!--                    <a class="dropdown-item" href="#">Action</a>-->
+            <!--                    <a class="dropdown-item" href="#">Another action</a>-->
+            <!--                    <a class="dropdown-item" href="#">Something else here</a>-->
+            <!--                </div>-->
+            <!--            </li>-->
+        </ul>
+
+    </div>
+</nav>
+
+<main role="main" class="container">
+
+    <div class="starter-template">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <form role="form">
+                        <div class="form-group">
+                            <label for="dbName">选择数据库</label>
+                            <select id="dbName" class="form-control">
+                                <option>请选择</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tableName">选择表</label>
+                            <select id="tableName" class="form-control">
+                                <option>请选择</option>
+                            </select>
+                        </div>
+
+                        <div style="border: 1px solid #D6D6D6;padding: 5px;">
+                            <label>选择列</label><span style="margin-left: 20px"><span id="generateCode" class="btn-primary btn-sm">生成代码</span></span>
+                            <table class="table table-hover">
+                                <thead>
+                                <th><span class="btn btn-primary btn-sm" id="check-all">全选</span></th>
+                                <th>DbName</th>
+                                <th>Table</th>
+                                <th>Column</th>
+                                <th>Type</th>
+                                <th>Comment</th>
+                                </thead>
+                                <tbody id="column">
+<!--                                <tr>-->
+<!--                                    <td><input type="checkbox" name="column" value=""></td>-->
+<!--                                    <td>DbName</td>-->
+<!--                                    <td>Table</td>-->
+<!--                                    <td>Column</td>-->
+<!--                                    <td>Type</td>-->
+<!--                                    <td>Comment</td>-->
+<!--                                </tr>-->
+                                </tbody>
+                            </table>
+                            <div class="form-group" id="div-col">
+                                <div class="checkbox">
+                                    <label></label>
+                                </div>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+                <div class="col-md-6" style="border: 1px solid #D6D6D6;padding: 5px;">
+                    <textarea cols="70" rows="30" id="code"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main><!-- /.container -->
+
+<script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+<script>
+    var map = {};
+    $(document).ready(function () {
+        $.get("getDb", function (res) {
+            var html = "<option>请选择</option>";
+            for (var i = 0; i < res.length; i++) {
+                html += "<option>" + res[i] + "</option>"
+            }
+            $("#dbName").html(html)
+        })
+    });
+    $("#dbName").change(function () {
+        var val = $("#dbName").val()
+        $.get("getTable?dbName=" + val, function (res) {
+            var html = "<option>请选择</option>";
+            for (var i = 0; i < res.length; i++) {
+                html += "<option>" + res[i] + "</option>"
+            }
+            $("#tableName").html(html)
+        })
+    });
+    $("#tableName").change(function () {
+        var dbName = $("#dbName").val();
+        var tableName = $("#tableName").val();
+        $.get("getColumns?dbName=" + dbName + "&tableName=" + tableName, function (res) {
+            var html = "";
+            for (var i = 0; i < res.length; i++) {
+                map[i]=res[i];
+                html += '<tr>';
+                html += '<td><input type="checkbox" name="column" value="' + i + '"></td>';
+                html += '<td>' + res[i].dbName + '</td>';
+                html += '<td>' + res[i].tableName + '</td>';
+                html += '<td>' + res[i].columnName + '</td>';
+                html += '<td>' + res[i].dataType + '</td>';
+                html += '<td>' + res[i].columnComment + '</td>';
+                html += '</tr>';
+            }
+            $("#column").html(html);
+        })
+    });
+    var checked = false;
+    $("#check-all").click(function () {
+        $("input[name=column]").prop("checked", !checked);
+        checked = !checked;
+    });
+    $("#generateCode").click(function () {
+        var list = [];
+        var selectItem = $("input[name=column]");
+        for (var i = 0; i < selectItem.length; i++) {
+            var idx = $(selectItem[i]).val();
+            list.push(map[idx])
+        }
+        var data = JSON.stringify(list);
+        $.ajax({
+            type: "POST",
+            url: "getJavaBean",
+            contentType: "application/json;charset=utf-8",
+            data:data,
+            success:function (res) {
+                console.log(res)
+                $("#code").text(res);
+            }
+
+        });
+    });
+</script>
+</body>
+</html>
