@@ -65,7 +65,13 @@ $("#generateCode").click(function () {
         data: data,
         success: function (res) {
             $("#code").text(res.data);
+            adaptText();
         }
 
     });
 });
+
+function adaptText() {
+    var text = document.getElementById("code");
+    autoTextarea(text);// 调用
+}

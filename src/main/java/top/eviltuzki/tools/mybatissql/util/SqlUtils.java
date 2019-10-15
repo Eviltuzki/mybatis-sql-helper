@@ -54,7 +54,7 @@ public class SqlUtils {
                                 sqlBuilder.append(LINE_START).append(" </if> ").append(LINE_SPLIT);
                             }else {
                                 sqlBuilder.append(LINE_START).append(" <if test=\"").append(field).append(" != null \">").append(LINE_SPLIT);
-                                sqlBuilder.append(LINE_START).append(LINE_START).append(column).append(" = #{").append(field).append("} ").append(LINE_SPLIT);
+                                sqlBuilder.append(LINE_START).append(LINE_START).append(" and ").append(column).append(" = #{").append(field).append("} ").append(LINE_SPLIT);
                                 sqlBuilder.append(LINE_START).append(" </if> ").append(LINE_SPLIT);
                             }
                         }else {

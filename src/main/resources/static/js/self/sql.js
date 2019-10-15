@@ -65,6 +65,7 @@ $("#generateCode").click(function () {
         data: data,
         success: function (res) {
             $("#code").text(res.data);
+            adaptText();
         }
 
     });
@@ -76,7 +77,7 @@ function getColumnList() {
     for (var i = 0; i < trList.length; i++) {
         var tdList = $(trList[i]).find("td");
         var columnName = $(tdList[0]).text();
-        var stringType = $(tdList[4]).text();
+        var stringType = $(tdList[3]).text();
         var selected = $($(tdList[1]).find("input")).is(":checked");
         var where = $($(tdList[2]).find("input:radio:checked")).val();
 
@@ -91,4 +92,9 @@ function getColumnList() {
         list.push(item);
     }
     return list;
+}
+
+function adaptText() {
+    var text = document.getElementById("code");
+    autoTextarea(text);// 调用
 }
