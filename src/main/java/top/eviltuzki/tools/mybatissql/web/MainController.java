@@ -27,9 +27,14 @@ public class MainController {
     private Logger logger = LoggerFactory.getLogger(MainController.class);
     @Resource
     private DbService dbService;
+    @GetMapping("/")
+    public ModelAndView index() {
+        return new ModelAndView("index");
+    }
+
 
     @GetMapping("/bean")
-    public ModelAndView index() {
+    public ModelAndView bean() {
         return new ModelAndView("bean");
     }
 
@@ -141,9 +146,9 @@ public class MainController {
     public Result<InitDbInfoVo> getDbInfo() {
         try {
             InitDbInfoVo vo = new InitDbInfoVo();
-            vo.setPassword(ConfigUtil.getPassword());
-            vo.setUrl(ConfigUtil.getOriginalUrl());
-            vo.setUsername(ConfigUtil.getUsername());
+            vo.setPassword(StringUtils.isEmpty(ConfigUtil.getPassword())?"1234":ConfigUtil.getPassword());
+            vo.setUrl(StringUtils.isEmpty(ConfigUtil.getOriginalUrl())?"localhost:3306":ConfigUtil.getOriginalUrl());
+            vo.setUsername(StringUtils.isEmpty(ConfigUtil.getUsername())?"root":ConfigUtil.getUsername());
             return Result.successResult(vo);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);

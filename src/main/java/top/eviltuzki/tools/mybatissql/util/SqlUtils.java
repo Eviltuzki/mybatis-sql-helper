@@ -8,17 +8,17 @@ import java.util.stream.Collectors;
 
 public class SqlUtils {
     private final static  String LINE_SPLIT = "\n";
-    private final static  String LINE_START = "\t";
+    private final static  String LINE_START = "  ";
     public static void fillSql(StringBuilder sqlBuilder, GenerateSqlReqVo vo) {
         switch (vo.getOperateType()) {
             case INSERT: {
-                sqlBuilder.append("INSERT INTO `").append(vo.getTableName()).append("` (");
+                sqlBuilder.append("INSERT INTO `").append(vo.getTableName()).append("`\n(");
                 List<ColumnItem> list = vo.getList().stream().filter(ColumnItem::getSelected).collect(Collectors.toList());
                 for (ColumnItem item : list) {
                     sqlBuilder.append(item.getColumnName()).append(",");
                 }
                 sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);
-                sqlBuilder.append(") VALUES (");
+                sqlBuilder.append(")\n VALUES \n(");
                 for (ColumnItem item : list) {
                     sqlBuilder.append("#{").append(StringUtil.camelName(item.getColumnName())).append("},");
                 }
@@ -29,12 +29,19 @@ public class SqlUtils {
                 sqlBuilder.append("DELETE FROM `").append(vo.getTableName()).append("` WHERE id=#{id}");
                 break;
             case UPDATE:
-                sqlBuilder.append("UPDATE `").append(vo.getTableName()).append("` SET ");
+                sqlBuilder.append("UPDATE `").append(vo.getTableName()).append("` ").append(LINE_SPLIT);
+                sqlBuilder.append("<set>").append(LINE_SPLIT);
                 for (ColumnItem item : vo.getList().stream().filter(ColumnItem::getSelected).collect(Collectors.toList())) {
-                    sqlBuilder.append(LINE_SPLIT).append(LINE_START).append(item.getColumnName()).append("= #{").append(StringUtil.camelName(item.getColumnName())).append("},");
+                    if ("String".equals(Db2JavaTypeMapping.get(item.getStringType()))){
+                        sqlBuilder.append(LINE_START).append("<if test=\"").append(StringUtil.camelName(item.getColumnName())).append(" != null and ").append(StringUtil.camelName(item.getColumnName())).append(" !=''\">");
+                    }else {
+                        sqlBuilder.append(LINE_START).append("<if test=\"").append(StringUtil.camelName(item.getColumnName())).append(" != null\">");
+                    }
+                    sqlBuilder.append(LINE_SPLIT).append(LINE_START).append(LINE_START).append(item.getColumnName()).append(" = #{").append(StringUtil.camelName(item.getColumnName())).append("},");
+                    sqlBuilder.append(LINE_SPLIT).append(LINE_START).append("</if>").append(LINE_SPLIT);
                 }
-                sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);
-                sqlBuilder.append(LINE_SPLIT).append(" WHERE id = #{id}");
+                sqlBuilder.append("</set>").append(LINE_SPLIT);
+                sqlBuilder.append(" WHERE id = #{id}");
                 break;
             case SELECT:
                 sqlBuilder.append("SELECT ");
